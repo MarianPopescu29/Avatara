@@ -12,4 +12,51 @@
 <div class="panel"><h3 id="avatarName">Maya</h3><p class="muted">Profilul personajului</p><div class="field"><label>Personalitate</label><select><option>Prietenos și sociabil</option><option>Amuzant și jucăuș</option><option>Calm și atent</option><option>Încrezător și direct</option></select></div><div class="field"><label>Interese</label><input type="text" placeholder="Ex.: muzică, călătorii, filme"></div><div class="field"><label>Descriere</label><input type="text" placeholder="Descrie pe scurt personajul..."></div><div class="notice">În versiunea finală, aceste setări vor defini memoria și comportamentul companionului AI.</div><div style="height:16px"></div><h3>Ce urmează?</h3><p class="muted">Conectăm un editor 3D real, autentificarea, salvarea personajelor și un model AI conversațional. Utilizatorii vor putea reveni la avatarul creat.</p></div></section>
 <div class="section-title" id="chat"><div class="eyebrow">Demo interactiv</div><h2>Testează conversația</h2><p>Exemplu local de interfață; răspunsurile nu sunt generate de un AI real.</p></div><section class="panel"><div class="chat" id="chatbox"><div class="bubble">Bună! Eu sunt Maya. Ce ți-ar plăcea să facem astăzi?</div></div><div class="chatrow"><input id="msg" placeholder="Scrie un mesaj..." onkeydown="if(event.key==='Enter')send()"><button class="btn" onclick="send()">Trimite</button></div></section>
 <div class="section-title" id="plans"><div class="eyebrow">Acces & abonamente</div><h2>Un model de monetizare</h2><p>Prețuri demonstrative — nu se procesează plăți în acest prototip.</p></div><section class="plans"><div class="plan"><h3>Free</h3><strong>0 €</strong><p>Un avatar demo<br>Personalizare de bază<br>Acces limitat</p></div><div class="plan" style="border-color:#9b55d8"><h3>Plus</h3><strong>9,99 €<small>/lună</small></strong><p>Mai multe avataruri<br>Chat extins<br>Opțiuni suplimentare</p><button class="btn" onclick="alert('Plățile vor fi activate după integrarea Stripe.')">Alege Plus</button></div><div class="plan"><h3>Pro</h3><strong>19,99 €<small>/lună</small></strong><p>Toate funcțiile Plus<br>Personalizare avansată<br>Acces prioritar</p><button class="btn" onclick="alert('Plățile vor fi activate după integrarea Stripe.')">Alege Pro</button></div></section><p class="notice">Platforma finală trebuie să aibă autentificare, protecția datelor, moderare și verificarea vârstei dacă va include funcții destinate exclusiv adulților.</p></main><footer>© 2026 AVATARA · Prototip de pornire</footer>
-<script>function skin(c,b){document.querySelector('#face').style.background=c;document.querySelector('.neck').style.background=c;document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('active'));b.classList.add('active')}function send(){let i=document.querySelector('#msg'),v=i.value.trim();if(!v)return;let box=document.querySelector('#chatbox');let a=document.createElement('div');a.className='bubble me';a.textContent=v;box.append(a);i.value='';setTimeout(()=>{let r=document.createElement('div');r.className='bubble';r.textContent='Interesant! În versiunea completă, aici voi răspunde cu ajutorul inteligenței artificiale.';box.append(r);box.scrollTop=box.scrollHeight},450);box.scrollTop=box.scrollHeight}</script></body></html>
+<script>
+
+<script>
+async function send() {
+  const input = document.querySelector("#msg");
+  const chatbox = document.querySelector("#chatbox");
+  const message = input.value.trim();
+
+  if (!message) return;
+
+  const userBubble = document.createElement("div");
+  userBubble.className = "bubble me";
+  userBubble.textContent = message;
+  chatbox.appendChild(userBubble);
+
+  input.value = "";
+
+  const loading = document.createElement("div");
+  loading.className = "bubble";
+  loading.textContent = "Maya scrie...";
+  chatbox.appendChild(loading);
+  chatbox.scrollTop = chatbox.scrollHeight;
+
+  try {
+    const response = await fetch("/.netlify/functions/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        message,
+        avatar: {
+          name: document.querySelector("#name").value || "Maya",
+          personality: document.querySelector(".panel select").value
+        }
+      })
+    });
+
+    const data = await response.json();
+    loading.textContent = data.reply || data.error || "Nu am primit un răspuns.";
+  } catch (error) {
+    loading.textContent = "Nu mă pot conecta momentan. Încearcă din nou.";
+  }
+
+  chatbox.scrollTop = chatbox.scrollHeight;
+}
+</script>
+</body>
+</html>
+
